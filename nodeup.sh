@@ -60,15 +60,15 @@ print_usage_instructions() {
 ${C_BOLD}Usage${C_RESET}: $INST_NAME <task> [version]
 ${C_BOLD}Tasks${C_RESET}:
   current              print the currently selected version of $LANG_NAME
-  latest [lts]         print the latest version of $LANG_NAME for download
+  latest [lts]         print the latest/lts version of $LANG_NAME for download
   local                print versions of $LANG_NAME ready to be selected
   remote               print versions of $LANG_NAME available for download
   update               update this tool to the latest version
-  upgrade [lts]        upgrade $LANG_NAME to the latest and remove the current version
+  upgrade [lts]        upgrade $LANG_NAME to latest/lts and remove current version
   up [lts]             perform both update and upgrade tasks
-  install <version>    add the specified or the latest version of $LANG_NAME
-  uninstall <version>  remove the specified version of $LANG_NAME
-  use <version>        use the specified or the latest version of $LANG_NAME
+  install <version>    add the specified, lts or latest version of $LANG_NAME
+  uninstall <version>  remove the specified, lts or latest version of $LANG_NAME
+  use <version>        use the specified, lts or latest version of $LANG_NAME
   help                 print usage instructions for this tool
   version              print the version of this tool"
 }
@@ -93,7 +93,7 @@ if [ $# -eq 1 ]; then
     fi
     ARG=
 else
-    if [[ ' current help local remote up update version ' =~ [[:space:]]${TASK}[[:space:]] ]]; then
+    if [[ ' current help local remote update version ' =~ [[:space:]]${TASK}[[:space:]] ]]; then
         fail 'unexpected argument' "for task $TASK"
     fi
     ARG=$2
@@ -293,10 +293,6 @@ download_tool_version() {
             fail 'failed downloading and unpacking' "$TOOL_URL_PKG to $INST_DIR/$VER"
         end_debug
     fi
-    command mv "$INST_DIR/$VER/$VER_NAME/*" "$INST_DIR/$VER/" ||
-        fail 'failed moving' "$INST_DIR/$VER/$VER_NAME/* to $INST_DIR/$VER/"
-    command rmdir "$INST_DIR/$VER/$VER_NAME" ||
-        fail 'failed deleting' "$INST_DIR/$VER/$VER_NAME"
     pass 'downloaded and upacked' "$INST_DIR/$VER"
 }
 
@@ -339,13 +335,10 @@ link_tool_version_directory() {
 }
 
 get_remote_versions() {
-    check_curl_exists
     check_jq_exists
     check_grep_exists
     check_sed_exists
     check_sort_exists
-
-    detect_platform
 
     start_debug "downloading $TOOL_URL_DIR/"
     TOOL_REMOTE_VERSIONS=$(command curl -f "$PROGRESS" "$TOOL_URL_DIR/" | command grep -E "\"v([.0-9]+)/\"" | command sed -E "s/^.+\"v([.0-9]+)\/\".+$/\1/g" | command sort -Vr) ||
@@ -357,16 +350,19 @@ get_latest_remote_version() {
     get_remote_versions
 
     local LIST=()
-    if [[ $ARG  = lts ]]; then
+    if [[ $ARG = lts ]]; then
         for DIR in $TOOL_REMOTE_VERSIONS; do
             if [[ $DIR == $LTS.* ]]; then
                 LIST+=("$DIR")
             fi
         done
     else
-        mapfile -n 1 LIST < <(echo "$TOOL_REMOTE_VERSIONS")
+        mapfile -n 1 -t LIST < <(echo "$TOOL_REMOTE_VERSIONS")
     fi
     TOOL_LATEST_VER="${LIST[0]}"
+    VER_NAME=$TOOL_NAME-v$TOOL_LATEST_VER-$PLATFORM
+    PKG_NAME=$VER_NAME$PKG_EXT
+    TOOL_URL_PKG=${TOOL_URL_PKG-$TOOL_URL_DIR/v$TOOL_LATEST_VER/$PKG_NAME}
 }
 
 remove_version_arg_from_local_tool_versions() {
@@ -384,8 +380,9 @@ get_latest_local_tool_version() {
 
     if [[ "${INST_LOCAL[*]}" != "" ]]; then
         local SORTED
-        SORTED=$(printf '%s\n' "${INST_LOCAL[*]}" | command sort -Vr) ||
+        SORTED=$(printf '%s\n' "${INST_LOCAL[@]}" | command sort -Vr) ||
             fail 'failed sorting' "versions: ${INST_LOCAL[*]}"
+        local LIST
         read -r TOOL_VER < <(echo "${SORTED[@]}")
     else
         TOOL_VER=
@@ -407,7 +404,7 @@ get_lts_local_tool_version() {
     get_lts_local_tool_versions
     if [[ "${LTS_VERSIONS[*]}" != "" ]]; then
         local SORTED
-        SORTED=$(printf '%s\n' "${LTS_VERSIONS[*]}" | command sort -Vr) ||
+        SORTED=$(printf '%s\n' "${LTS_VERSIONS[@]}" | command sort -Vr) ||
             fail 'failed sorting' "versions: ${LTS_VERSIONS[*]}"
         read -r TOOL_VER < <(echo "${SORTED[@]}")
     else
@@ -469,7 +466,7 @@ install_tool_version() {
     fi
 
     local VER
-    if [[ "$ARG" = "latest" ]]; then
+    if [[ "$ARG" = "latest" ]] || [[ "$ARG" = "lts" ]]; then
         get_latest_remote_version
         VER=$TOOL_LATEST_VER
     else
@@ -563,8 +560,11 @@ print_local_tool_versions() {
 }
 
 print_remote_tool_versions() {
+    check_curl_exists
+
+    detect_platform
     get_remote_versions
-    echo "$TOOL_REMOTE_VERSIONS"
+    echo "${TOOL_REMOTE_VERSIONS[@]}"
 }
 
 uninstall_tool_version() {
@@ -585,13 +585,16 @@ uninstall_tool_version() {
         if [[ "${INST_LOCAL[*]}" != "" ]]; then
             get_latest_local_tool_version
             link_tool_version_directory "$TOOL_VER"
-3        else
+        else
             announce deleted "the latest $LANG_NAME version"
         fi
     fi
 }
 
 print_latest_remote_version() {
+    check_curl_exists
+
+    detect_platform
     get_latest_remote_version
     echo "$TOOL_LATEST_VER"
 }

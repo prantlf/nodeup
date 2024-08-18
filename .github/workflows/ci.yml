@@ -21,6 +21,7 @@ jobs:
       if: ${{ github.ref_name == 'master' }}
       with:
         no-archives: true
+        no-node: true
         bump-files: install.sh,nodeup.sh
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

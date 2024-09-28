@@ -430,7 +430,7 @@ find_remote_tool_version_by_arg() {
 
 remove_from_local_tool_versions() {
     local VER=$1
-    local OLD_LOCAL=("${INST_LOCAL[@]}")
+    local OLD_LOCAL=("${INST_LOCAL[@]-}")
     INST_LOCAL=()
     for DIR in "${OLD_LOCAL[@]}"; do
         if [[ "$DIR" != "$VER" ]]; then
@@ -454,7 +454,7 @@ get_latest_local_tool_version() {
 
 get_lts_local_tool_versions() {
     LTS_VERSIONS=()
-    for DIR in "${INST_LOCAL[@]}"; do
+    for DIR in "${INST_LOCAL[@]-}"; do
         if [[ $DIR == $LTS.* ]]; then
             LTS_VERSIONS+=("$DIR")
         fi
@@ -486,12 +486,12 @@ find_local_tool_version_by_arg() {
         else
             DESC=""
         fi
-        local SORTED_OUT
-        SORTED_OUT=$(printf '%s\n' "${INST_LOCAL[@]}" | command sort -V${DESC}) ||
-            fail 'failed sorting' "versions: ${INST_LOCAL[*]}"
         local SORTED
-        readarray -t SORTED < <(echo "${SORTED_OUT[@]}")
-        for DIR in "${SORTED[@]}"; do
+        SORTED=$(printf '%s\n' "${INST_LOCAL[@]}" | command sort -V${DESC}) ||
+            fail 'failed sorting' "versions: ${INST_LOCAL[*]}"
+        local LIST
+        readarray -t LIST < <(echo "${SORTED[@]}")
+        for DIR in "${LIST[@]}"; do
             if [[ $DIR == $ARG.* ]]; then
                 TOOL_VER="$DIR"
                 return
@@ -663,7 +663,7 @@ update_installer_and_upgrade_tool_version() {
 print_local_tool_versions() {
     check_installer_directory_exists
     get_local_tool_versions
-    printf '%s\n' "${INST_LOCAL[@]}" | command sort -V
+    printf '%s\n' "${INST_LOCAL[@]-}" | command sort -V
 }
 
 print_remote_tool_versions() {

@@ -8,7 +8,7 @@ Upgrades to the latest version of Node, or manages more versions of Node on the 
 * Simple. Switches the version globally, no environment variable changes needed.
 * Efficient. Just run `nodeup up`.
 
-Platforms: `aix-ppc64`, `darwin-x64`, `darwin-arm64`, `linux-x64`, `linux-x64-musl`, `linux-arm64`, `linux-armv7l`, `linux-loong64`, `linux-ppc64le`, `linux-riscv64`, `linux-s390x`, `windows-x86`, `windows-x64`, `windows-arm64`.
+Platforms: `aix-ppc64`, `darwin-x64`, `darwin-arm64`, `linux-x64`, `linux-x86`, `linux-x64-musl`, `linux-arm64`, `linux-armv6l`, `linux-armv7l`, `linux-loong64`, `linux-ppc64le`, `linux-riscv64`, `linux-s390x`, `windows-x86`, `windows-x64`, `windows-arm64`.
 
 ## Getting Started
 
@@ -16,13 +16,17 @@ Make sure that you have `bash` 4 or newer and `curl` available, execute the foll
 
     curl -fSs https://raw.githubusercontent.com/prantlf/nodeup/master/install.sh | bash
 
-Install the latest version of Node, if it hasn't been installed yet:
+Install the latest LTS version of Node, if it hasn't been installed yet:
 
-    nodeup install latest
+    nodeup install lts
 
-Upgrade both the installer script and the Node language, if they're not the latest versions, and delete the previously active latest version from the disk too:
+Before you continue, make sure that you have the following tools available: `curl`, `grep`, `jq`, `ln`, `rm`, `rmdir`, `sed`, `tar` (non-Windows), `uname`, `unxz` (non-Windows), `unzip` (Windows). It's likely that `jq` will be missing. You can install it like this on Debian: `apt-get install -y jq`.
 
-    nodeup up
+Upgrade both the installer script and the Node language (to the latest LTS version), if they're not up-to-date, and delete the previously active latest LTS version from the disk too:
+
+    nodeup up lts
+
+If you specify `latest` instead of `'lts`, the latest non-LTS version will apply.
 
 ## Installation
 
@@ -49,11 +53,11 @@ Start a new shell after the installer finishes. Or extend the `PATH` in the curr
 | `~/.nodeup` | directory with the installer script and versions of Node |
 | `~/.node`   | symbolic link to the currently active version of Node    |
 
-For example, with the Node 1.23.0 activated:
+For example, with the Node 20.16.0 activated:
 
     /home/prantlf/.nodeup
-      ├── 20.16.0  (another version)
-      ├── 22.6.0   (linked to /home/prantlf/.node)
+      ├── 20.16.0  (linked to /home/prantlf/.node)
+      ├── 22.6.0   (another version)
       └── nodeup   (installer script)
 
 ## Usage
@@ -84,6 +88,49 @@ If you enable `bash` debugging, every line of the script will be printed on the 
 You can debug the installer too:
 
     curl -fSs https://raw.githubusercontent.com/prantlf/nodeup/master/install.sh | bash -x
+
+## Platform Detection
+
+### Environment Variables
+
+The following environment variables can be set before running `install.sh` or `nodeup`, if you know what you're doing:
+
+| Variable       | Default value                 |
+|:---------------|:------------------------------|
+| `PLATFORM`     | detected using `uname`        |
+| `OS`           | part of `PLATFORM` before `-` |
+| `ARCH`         | part of `PLATFORM` after `-`  |
+| `TOOL_URL_DIR` | https://nodejs.org/download/release or https://unofficial-builds.nodejs.org/download/release for platforms `linux-x86`, `linux-armv6l`, `linux-loong64`, `linux-riscv64` |
+| `INST_DIR`     | `$HOME/.nodeup`               |
+| `TOOL_DIR`     | `$HOME/.node`                 |
+
+### ARM Architectures
+
+The detection of the architecture ARM v6 and v7 may not work in your environment. For example, `uname -m` in Debian reports:
+
+| Architecture | Output   |
+|:-------------|:---------|
+| ARM v6       | `armhf`  |
+| ARM v7       | `armhf`  |
+| ARM v8       | `arm64`  |
+
+While, `uname -m` in Raspbian reports:
+
+| Architecture | Output    |
+|:-------------|:----------|
+| ARM v6       | `armhf`   |
+| ARM v7       | `armv7l`  |
+| ARM v8       | `aarch64` |
+
+`nodeup` regognises `armhf` as ARM v6. If you use it on Debian and ARM v7, enforce the proper architecture by setting the environment variable `ARCH` explicitly:
+
+    ARCH=armv7l nodeup ...
+
+If you don't do it, the `node` executable will work well nevertheless, because binaries for ARM v6 can be run on ARM v7. Just the performance of floating point computations may be lower.
+
+If `uname` reports other value than `armhf`, the platform recognition will work well. Pay attention to the console output, in particular to this line:
+
+    detected platform linux-armv6l
 
 ## Contributing
 

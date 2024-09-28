@@ -118,7 +118,7 @@ check_tool_directory_exists() {
     fi
 }
 
-get_current_tool_version() {
+try_current_tool_version() {
     # TOOL_CUR_VER=$(command $TOOL_NAME tool dist version) ||
     #     fail 'failed getting' 'the current version of $LANG_NAME"
     if [ -e "$TOOL_DIR" ]; then
@@ -131,6 +131,13 @@ get_current_tool_version() {
         fi
         TOOL_CUR_VER=${BASH_REMATCH[1]}
     else
+        TOOL_CUR_VER=
+    fi
+}
+
+get_current_tool_version() {
+    try_current_tool_version
+    if [ -z "$TOOL_CUR_VER" ]; then
         fail 'not found' "any version in $TOOL_DIR"
     fi
 }
@@ -172,6 +179,10 @@ check_tar_exists() {
     check_command_exists tar 'unpacking tar archives'
 }
 
+check_unxz_exists() {
+    check_command_exists unxz 'decompressing tar.xz archives'
+}
+
 check_unzip_exists() {
     check_command_exists unzip 'unpacking zip archives'
 }
@@ -193,58 +204,86 @@ check_sed_exists() {
 }
 
 detect_platform() {
-    check_uname_exists
+    PLATFORM=${PLATFORM-}
+    if [ -z "$PLATFORM" ]; then
+        check_uname_exists
 
-    read -ra UNAME < <(command uname -ms)
-    OS=${UNAME[0],,}
-    ARCH=${UNAME[1],,}
+        OS=${OS-}
+        ARCH=${ARCH-}
+        if [ -z "$OS" ] || [ -z "$ARCH" ]; then
+            local UNAME
+            read -ra UNAME < <(command uname -ms)
+            if [ -z "$OS" ]; then
+                OS=${UNAME[0],,}
+            fi
+            if [ -z "$ARCH" ]; then
+                ARCH=${UNAME[1],,}
+            fi
+        fi
 
-    if ! [[ ' aix darwin linux windows ' =~ [[:space:]]${OS}[[:space:]] ]]; then
-        fail unsupported "operating system $OS"
-    fi
+        if ! [[ ' aix darwin linux windows ' =~ [[:space:]]${OS}[[:space:]] ]]; then
+            fail unsupported "operating system $OS"
+        fi
 
-    case $ARCH in
-    386 | i386 | i686)
-        ARCH=x86
-        ;;
-    aarch64 | armv8 | armv8l)
-        ARCH=arm64
-        ;;
-    arm | armv7)
-        ARCH=armv7l
-        ;;
-    ppc64_le)
-        ARCH=ppc64le
-        ;;
-    s390)
-        ARCH=s390x
-        ;;
-    x86_64 | amd64)
-        ARCH=x64
-        ;;
-    esac
+        case $ARCH in
+        386 | i386 | i686)
+            ARCH=x86
+            ;;
+        aarch64 | armv8 | armv8l)
+            ARCH=arm64
+            ;;
+        # arm | armel | armv5)
+        #     ARCH=armv5l
+        #     ;;
+        armv7)
+            ARCH=armv7l
+            ;;
+        armhf | armv6)
+            ARCH=armv6l
+            ;;
+        ppc64_le | ppc64el)
+            ARCH=ppc64le
+            ;;
+        s390)
+            ARCH=s390x
+            ;;
+        x86_64 | amd64)
+            ARCH=x64
+            ;;
+        esac
 
-    if ! [[ " x86 x64 armv7l arm64 loong64 ppc64 ppc64le riscv64 s390x " =~ [[:space:]]${ARCH}[[:space:]] ]]; then
-        fail unsupported "architecture $ARCH"
-    fi
+        if ! [[ " x86 x64 armv6l armv7l arm64 loong64 ppc64 ppc64le riscv64 s390x " =~ [[:space:]]${ARCH}[[:space:]] ]]; then
+            fail unsupported "architecture $ARCH"
+        fi
 
-    PLATFORM=$OS-$ARCH
+        PLATFORM=$OS-$ARCH
 
-    if [[ $PLATFORM = darwin-x64 ]]; then
-        if [[ $(sysctl -n sysctl.proc_translated 2>/dev/null) = 1 ]]; then
-            PLATFORM=darwin-arm64
-            pass 'changing platform' "to $PLATFORM because Rosetta 2 was detected"
+        if [[ $PLATFORM = darwin-x64 ]]; then
+            if [[ $(sysctl -n sysctl.proc_translated 2>/dev/null) = 1 ]]; then
+                PLATFORM=darwin-arm64
+                pass 'changing platform' "to $PLATFORM because Rosetta 2 was detected"
+            fi
+        fi
+
+        if ! [[ " aix-ppc64 darwin-x64 darwin-arm64 linux-x64 linux-x86 linux-arm64 linux-armv6l linux-armv7l linux-loong64 linux-ppc64le linux-riscv64 linux-s390x windows-x86 windows-x64 windows-arm64 " =~ [[:space:]]${PLATFORM}[[:space:]] ]]; then
+            fail unsupported "platform $PLATFORM"
+        fi
+    else
+        IFS='-' read -ra UNAME <<< "$PLATFORM"
+        OS=${UNAME[0],,}
+        if [ -z "$OS" ]; then
+            fail unrecognised "operatiung system in $PLATFORM"
+        fi
+        ARCH=${UNAME[1],,}
+        if [ -z "$OS" ]; then
+            fail unrecognised "architecturs in $PLATFORM"
         fi
     fi
 
-    if ! [[ " aix-ppc64 darwin-x64 darwin-arm64 linux-x64 linux-arm64 linux-armv7l linux-loong64 linux-ppc64le linux-riscv64 linux-s390x windows-x86 windows-x64 windows-arm64 " =~ [[:space:]]${PLATFORM}[[:space:]] ]]; then
-        fail unsupported "platform $PLATFORM"
-    fi
-
-    if [[ $ARCH = loong64 ]] || [[ $ARCH = riscv64 ]]; then
-        TOOL_URL_DIR=https://unofficial-builds.nodejs.org/download/release
+    if [[ " linux-x86 linux-armv6l linux-loong64 linux-riscv64 " =~ [[:space:]]${PLATFORM}[[:space:]] ]]; then
+        TOOL_URL_DIR=${TOOL_URL_DIR-https://unofficial-builds.nodejs.org/download/release}
     else
-        TOOL_URL_DIR=https://nodejs.org/download/release
+        TOOL_URL_DIR=${TOOL_URL_DIR-https://nodejs.org/download/release}
     fi
 
     if [[ $OS = windows ]]; then
@@ -289,7 +328,7 @@ download_tool_version() {
         command mkdir "$INST_DIR/$VER" ||
             fail 'failed creating' "directory $INST_DIR/$VER"
         start_debug "downloading and unpacking $TOOL_URL_PKG'"
-        command curl -f "$PROGRESS" "$TOOL_URL_PKG" | command tar -xzf - --strip-components=1 -C "$INST_DIR/$VER" ||
+        command curl -f "$PROGRESS" "$TOOL_URL_PKG" | command unxz | command tar x --strip-components=1 -C "$INST_DIR/$VER" ||
             fail 'failed downloading and unpacking' "$TOOL_URL_PKG to $INST_DIR/$VER"
         end_debug
     fi
@@ -424,7 +463,7 @@ get_local_tool_version_by_arg() {
 
 exists_local_tool_version() {
     local VER=$1
-    if [[ " ${INST_LOCAL[*]} " =~ [[:space:]]${VER}[[:space:]] ]]; then
+    if [ -n "$VER" ] && [[ " ${INST_LOCAL[*]} " =~ [[:space:]]${VER}[[:space:]] ]]; then
         VER_EXISTS=1
     else
         VER_EXISTS=
@@ -434,7 +473,11 @@ exists_local_tool_version() {
 check_local_tool_version_exists() {
     exists_local_tool_version "$TOOL_VER"
     if [[ "$VER_EXISTS" = "" ]]; then
-        fail 'not found' "$INST_DIR/$TOOL_VER"
+        if [[ "$TOOL_VER" = "" ]]; then
+            fail 'not found' "any version in $INST_DIR"
+        else
+            fail 'not found' "$INST_DIR/$TOOL_VER"
+        fi
     fi
 }
 
@@ -444,7 +487,7 @@ ensure_tool_directory_link() {
     if [[ "$TOOL_EXISTS" = "" ]]; then
         link_tool_version_directory "$VER"
     else
-        get_current_tool_version
+        try_current_tool_version
         if [[ "$TOOL_CUR_VER" != "$VER" ]]; then
             link_tool_version_directory "$VER"
         fi
@@ -463,6 +506,7 @@ install_tool_version() {
         check_unzip_exists
     else
         check_tar_exists
+        check_unxz_exists
     fi
 
     local VER
@@ -504,6 +548,7 @@ upgrade_tool_version() {
         check_unzip_exists
     else
         check_tar_exists
+        check_unxz_exists
     fi
 
     get_latest_remote_version
@@ -574,11 +619,20 @@ uninstall_tool_version() {
     check_installer_directory_exists
     get_local_tool_versions
     get_local_tool_version_by_arg
-    check_local_tool_version_exists
-    get_current_tool_version
 
-    delete_tool_version "$TOOL_VER"
-    if [[ "$TOOL_CUR_VER" = "$TOOL_VER" ]]; then
+    exists_local_tool_version "$TOOL_VER"
+    if [[ "$VER_EXISTS" = "" ]]; then
+        if [[ "$TOOL_VER" = "" ]]; then
+            fail 'not found' "any version in $INST_DIR"
+        else
+            fail 'not found' "$INST_DIR/$TOOL_VER"
+        fi
+    else
+        delete_tool_version "$TOOL_VER"
+    fi
+
+    try_current_tool_version
+    if [ -n "$TOOL_CUR_VER" ] && [[ "$TOOL_CUR_VER" = "$TOOL_VER" ]]; then
         command rm "$TOOL_DIR" ||
             fail 'failed deleting' "$TOOL_DIR"
         get_local_tool_versions

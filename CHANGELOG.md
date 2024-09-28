@@ -1,5 +1,11 @@
 # Changes
 
+## [0.4.1](https://github.com/prantlf/nodeup/compare/v0.4.0...v0.4.1) (2024-09-28)
+
+### Bug Fixes
+
+* Avoid unbound variable error if no version is installed ([025f364](https://github.com/prantlf/nodeup/commit/025f364f64a78cd159a0d77134799ed905ed2ca5))
+
 ## [0.4.0](https://github.com/prantlf/nodeup/compare/v0.3.1...v0.4.0) (2024-09-28)
 
 ### Features

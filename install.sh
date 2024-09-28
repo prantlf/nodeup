@@ -48,7 +48,7 @@ end_debug() {
 readonly INST_NAME=nodeup
 readonly LANG_NAME=Node
 readonly TOOL_NAME=node
-readonly VERSION=0.4.0
+readonly VERSION=0.4.1
 
 readonly INST_DIR="${INST_DIR-$HOME/.$INST_NAME}"
 readonly NEW_PATH="\$HOME/.$INST_NAME:\$HOME/.$TOOL_NAME/bin:\$PATH"

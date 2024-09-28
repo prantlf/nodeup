@@ -48,7 +48,7 @@ end_debug() {
 readonly INST_NAME=nodeup
 readonly LANG_NAME=Node
 readonly TOOL_NAME=node
-readonly VERSION=0.2.0
+readonly VERSION=0.3.0
 
 readonly INST_DIR="${INST_DIR-$HOME/.$INST_NAME}"
 readonly TOOL_DIR=${TOOL_DIR-$HOME/.$TOOL_NAME}

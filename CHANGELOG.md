@@ -1,5 +1,15 @@
 # Changes
 
+## [0.3.0](https://github.com/prantlf/nodeup/compare/v0.2.0...v0.3.0) (2024-09-28)
+
+### Features
+
+* Sort printed versions in ascending direction ([b817b07](https://github.com/prantlf/nodeup/commit/b817b07c30efb960a1cfcad257b6075b7d0f8b9e))
+
+### Bug Fixes
+
+* Choose the latest remaining version after uninstalling the active one ([7382700](https://github.com/prantlf/nodeup/commit/7382700a311f088ae002838319a05168cf1c3bfd))
+
 ## [0.2.0](https://github.com/prantlf/nodeup/compare/v0.1.0...v0.2.0) (2024-09-28)
 
 ### Features

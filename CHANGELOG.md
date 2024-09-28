@@ -1,5 +1,19 @@
 # Changes
 
+## [0.4.0](https://github.com/prantlf/nodeup/compare/v0.3.1...v0.4.0) (2024-09-28)
+
+### Features
+
+* Support Linux x86 and ARM v6 ([d801aef](https://github.com/prantlf/nodeup/commit/d801aefa059c2e85fbe6604774138caaf0d5e68c))
+* Accept version by just MAJ or MAJ.MIN ([0800ca3](https://github.com/prantlf/nodeup/commit/0800ca30a4a308df0dea9a496674df3f6116dcce))
+* Sort printed versions in ascending direction ([e79e582](https://github.com/prantlf/nodeup/commit/e79e5826570539638948f8035a2953e726eac659))
+
+### Bug Fixes
+
+* Choose the latest remaining version after uninstalling the active one ([92d6e90](https://github.com/prantlf/nodeup/commit/92d6e90f245b5034d8e88f770b2981b71ac142d4))
+* Exit right after upgrading nodeup ([30822b0](https://github.com/prantlf/nodeup/commit/30822b0d2051428cd127f7058353a3e8be9dbee1))
+* Stop executing the current script when updating it ([17fbd46](https://github.com/prantlf/nodeup/commit/17fbd466488f065636cc6e9c9e4baa0ba9b10411))
+
 ## [0.3.1](https://github.com/prantlf/nodeup/compare/v0.3.0...v0.3.1) (2024-09-28)
 
 ### Bug Fixes

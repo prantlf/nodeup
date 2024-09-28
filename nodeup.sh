@@ -627,6 +627,8 @@ upgrade_tool_version() {
 }
 
 do_update_installer() {
+    local DO_UPGRADE=$1
+    local UPGRADE_ARG=$ARG
     local LATEST_VER
     local TRACE
     readonly INST_ROOT_URL="${INST_VER_URL-https://raw.githubusercontent.com/prantlf/$INST_NAME/master}"
@@ -642,7 +644,7 @@ do_update_installer() {
         fi
         readonly INST_URL="${INST_URL-$INST_ROOT_URL/install.sh}"
         start_debug "downloading $INST_URL"
-        command curl -f "$PROGRESS" "$INST_URL" | NO_INSTRUCTIONS=1 bash $TRACE ||
+        exec curl -f "$PROGRESS" "$INST_URL" | NO_INSTRUCTIONS=1 DO_UPGRADE=$DO_UPGRADE UPGRADE_ARG=$UPGRADE_ARG bash $TRACE ||
             fail 'failed downloading and executing' "$INST_URL"
         end_debug
     else
@@ -651,14 +653,11 @@ do_update_installer() {
 }
 
 update_installer() {
-    do_update_installer
-    exit 0
+    do_update_installer 0
 }
 
 update_installer_and_upgrade_tool_version() {
-    do_update_installer
-    upgrade_tool_version
-    exit 0
+    do_update_installer 1
 }
 
 print_local_tool_versions() {

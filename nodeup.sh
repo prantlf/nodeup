@@ -374,19 +374,26 @@ link_tool_version_directory() {
 }
 
 get_remote_versions() {
+    local DESC=$1
+
     check_jq_exists
     check_grep_exists
     check_sed_exists
     check_sort_exists
 
     start_debug "downloading $TOOL_URL_DIR/"
-    TOOL_REMOTE_VERSIONS=$(command curl -f "$PROGRESS" "$TOOL_URL_DIR/" | command grep -E "\"v([.0-9]+)/\"" | command sed -E "s/^.+\"v([.0-9]+)\/\".+$/\1/g" | command sort -Vr) ||
+    if [[ "$DESC" = "1" ]]; then
+        DESC="r"
+    else
+        DESC=""
+    fi
+    TOOL_REMOTE_VERSIONS=$(command curl -f "$PROGRESS" "$TOOL_URL_DIR/" | command grep -E "\"v([.0-9]+)/\"" | command sed -E "s/^.+\"v([.0-9]+)\/\".+$/\1/g" | command sort -V${DESC}) ||
         fail 'failed downloading and processing' "the output from $TOOL_URL_DIR/"
     end_debug
 }
 
 get_latest_remote_version() {
-    get_remote_versions
+    get_remote_versions 1
 
     local LIST=()
     if [[ $ARG = lts ]]; then
@@ -405,7 +412,7 @@ get_latest_remote_version() {
 }
 
 find_remote_tool_version_by_arg() {
-    get_remote_versions
+    get_remote_versions 1
 
     local LIST
     readarray -t LIST < <(echo "${TOOL_REMOTE_VERSIONS[@]}")
@@ -651,14 +658,14 @@ update_installer_and_upgrade_tool_version() {
 print_local_tool_versions() {
     check_installer_directory_exists
     get_local_tool_versions
-    printf '%s\n' "${INST_LOCAL[@]}" 
+    printf '%s\n' "${INST_LOCAL[@]}" | command sort -V
 }
 
 print_remote_tool_versions() {
     check_curl_exists
 
     detect_platform
-    get_remote_versions
+    get_remote_versions 0
     echo "${TOOL_REMOTE_VERSIONS[@]}"
 }
 

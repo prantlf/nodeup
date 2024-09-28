@@ -1,5 +1,11 @@
 # Changes
 
+## [0.3.1](https://github.com/prantlf/nodeup/compare/v0.3.0...v0.3.1) (2024-09-28)
+
+### Bug Fixes
+
+* Exit right after upgrading nodeup ([63f6e10](https://github.com/prantlf/nodeup/commit/63f6e10ac62610a4a935d8ce8bf770ca2b36c0ac))
+
 ## [0.3.0](https://github.com/prantlf/nodeup/compare/v0.2.0...v0.3.0) (2024-09-28)
 
 ### Features

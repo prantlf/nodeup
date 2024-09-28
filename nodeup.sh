@@ -626,7 +626,7 @@ upgrade_tool_version() {
     ensure_tool_directory_link "$TOOL_LATEST_VER"
 }
 
-update_installer() {
+do_update_installer() {
     local LATEST_VER
     local TRACE
     readonly INST_ROOT_URL="${INST_VER_URL-https://raw.githubusercontent.com/prantlf/$INST_NAME/master}"
@@ -650,9 +650,15 @@ update_installer() {
     fi
 }
 
+update_installer() {
+    do_update_installer
+    exit 0
+}
+
 update_installer_and_upgrade_tool_version() {
-    update_installer
+    do_update_installer
     upgrade_tool_version
+    exit 0
 }
 
 print_local_tool_versions() {

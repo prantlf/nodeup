@@ -649,6 +649,9 @@ do_update_installer() {
         end_debug
     else
         ignore 'up to date' "installer $LATEST_VER"
+        if [[ "$DO_UPGRADE" = "1" ]]; then
+            upgrade_tool_version
+        fi
     fi
 }
 

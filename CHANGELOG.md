@@ -1,5 +1,11 @@
 # Changes
 
+## [0.4.4](https://github.com/prantlf/nodeup/compare/v0.4.3...v0.4.4) (2024-09-29)
+
+### Bug Fixes
+
+* Upgrade both updater and tool on up ([daf3de8](https://github.com/prantlf/nodeup/commit/daf3de88843061ad2af37ffc5b7340a778e47828))
+
 ## [0.4.3](https://github.com/prantlf/nodeup/compare/v0.4.2...v0.4.3) (2024-09-29)
 
 ### Bug Fixes

@@ -1,5 +1,11 @@
 # Changes
 
+## [0.4.3](https://github.com/prantlf/nodeup/compare/v0.4.2...v0.4.3) (2024-09-29)
+
+### Bug Fixes
+
+* Fix typos ([1478b57](https://github.com/prantlf/nodeup/commit/1478b57de85a9b6a6719c036694c5bcddd75d9e0))
+
 ## [0.4.2](https://github.com/prantlf/nodeup/compare/v0.4.1...v0.4.2) (2024-09-28)
 
 ### Bug Fixes

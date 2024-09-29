@@ -272,11 +272,11 @@ detect_platform() {
         IFS='-' read -ra UNAME <<< "$PLATFORM"
         OS=${UNAME[0],,}
         if [ -z "$OS" ]; then
-            fail unrecognised "operatiung system in $PLATFORM"
+            fail unrecognised "operating system in $PLATFORM"
         fi
         ARCH=${UNAME[1],,}
         if [ -z "$OS" ]; then
-            fail unrecognised "architecturs in $PLATFORM"
+            fail unrecognised "architecture in $PLATFORM"
         fi
     fi
 
@@ -544,7 +544,7 @@ ensure_tool_directory_link() {
         if [[ "$TOOL_CUR_VER" != "$VER" ]]; then
             link_tool_version_directory "$VER"
         else
-            ignore 'alredy current' "$VER"
+            ignore 'already current' "$VER"
         fi
     fi
 }

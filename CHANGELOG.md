@@ -1,5 +1,11 @@
 # Changes
 
+## [0.6.0](https://github.com/prantlf/nodeup/compare/v0.5.0...v0.6.0) (2025-10-31)
+
+### Features
+
+* Bump LTS version to 24 ([03e8577](https://github.com/prantlf/nodeup/commit/03e85776f3e50fcd4ebd1755f9eea413abab6dc3))
+
 ## [0.5.0](https://github.com/prantlf/nodeup/compare/v0.4.4...v0.5.0) (2024-11-10)
 
 ### Features

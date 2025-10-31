@@ -26,7 +26,7 @@ Upgrade both the installer script and the Node language (to the latest LTS versi
 
     nodeup up lts
 
-If you specify `latest` instead of `'lts`, the latest non-LTS version will apply. The latest LTS version is 22.
+If you specify `latest` instead of `'lts`, the latest non-LTS version will apply. The latest LTS version is 24.
 
 ## Installation
 

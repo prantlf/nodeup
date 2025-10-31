@@ -52,7 +52,7 @@ readonly VERSION=0.5.0
 
 readonly INST_DIR="${INST_DIR-$HOME/.$INST_NAME}"
 readonly TOOL_DIR=${TOOL_DIR-$HOME/.$TOOL_NAME}
-readonly LTS=22
+readonly LTS=24
 
 print_usage_instructions() {
     echo -e "${C_BOLD}$INST_NAME $VERSION${C_RESET} - upgrade to the latest or manage more versions of $LANG_NAME
